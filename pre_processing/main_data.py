@@ -4,7 +4,6 @@ from pathlib import Path
 import regex as re
 
 import pandas as pd
-import numpy as np
 from spacy.tokenizer import Tokenizer
 from spacy.lang.en import English
 
@@ -13,6 +12,9 @@ from processing_functions import (
     add_stats,
     clean_sender,
     starts_with_timestamp,
+    extract_emojis,
+    remove_link_stats,
+    remove_media_stats,
 )
 
 nlp = English()
@@ -51,7 +53,8 @@ class ProcessedData:
     def __init__(self, raw_data):
         self.raw_data = raw_data
         self.df = self.process_dataframe()
-        self.df_filtered = None
+        self.df_filtered = self.df.copy()
+        self.df_emoji = self.process_emoji_dataframe()
 
     def process_dataframe(self):
         df = self.raw_data.series.str.extract(
@@ -65,6 +68,14 @@ class ProcessedData:
         clean_sender(df=df, rename_dict=self.raw_data.alias_dict)
         df["tokens"] = df.message.apply(lambda x: tokenizer(x))
         df = add_stats(df)
+        df = remove_link_stats(df)
+        df = remove_media_stats(df)
+        return df
+
+    def process_emoji_dataframe(df):
+        df["emoji"] = df.message.apply(extract_emojis)
+        df.drop(["message", "tokens"], axis=1, inplace=True)
+        df = df.explode("emoji")
         return df
 
 
