@@ -1,6 +1,9 @@
 """Module for helper functions relating to processing."""
-import pandas as pd
 import regex as re
+
+import pandas as pd
+import numpy as np
+import emoji
 
 
 def process_datetime(df):
@@ -28,3 +31,29 @@ def starts_with_timestamp(line):
     if result:
         return True
     return False
+
+
+def remove_link_stats(df, word_length=18):
+    df["avg_word_length"].where(
+        df["avg_word_length"] < word_length, np.nan, inplace=True
+    )
+    return df
+
+
+def extract_emojis(string):
+    return [char for char in string if char in emoji.UNICODE_EMOJI]
+
+
+def remove_media_stats(df, phrase="<Media omitted>"):
+    df.loc[
+        df["message"] == phrase, ["word_count", "letter_count", "avg_word_length"]
+    ] = np.nan
+    return df
+
+
+def process_word_series(word_series):
+    word_series.loc[word_series == "<Media omitted>"] = np.nan
+    word_series.dropna(inplace=True)
+    word_series = word_series.str.lower()
+    words = " ".join(review for review in word_series)
+    return words
