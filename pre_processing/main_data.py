@@ -1,5 +1,4 @@
 """Module for reading in raw text and performing basic processing."""
-from email.contentmanager import raw_data_manager
 from pathlib import Path
 import regex as re
 
@@ -7,7 +6,7 @@ import pandas as pd
 from spacy.tokenizer import Tokenizer
 from spacy.lang.en import English
 
-from processing_functions import (
+from pre_processing.processing_functions import (
     process_datetime,
     add_stats,
     clean_sender,
@@ -22,7 +21,7 @@ tokenizer = Tokenizer(nlp.vocab)
 
 
 class RawData:
-    def __init__(self, file_name, alias_dict):
+    def __init__(self, file_name, alias_dict={}):
         self.file_name = file_name
         self.alias_dict = alias_dict
         self.file_path = Path(__file__).parents[1] / "raw_export" / self.file_name
@@ -72,13 +71,9 @@ class ProcessedData:
         df = remove_media_stats(df)
         return df
 
-    def process_emoji_dataframe(df):
+    def process_emoji_dataframe(self):
+        df = self.df.copy()
         df["emoji"] = df.message.apply(extract_emojis)
         df.drop(["message", "tokens"], axis=1, inplace=True)
         df = df.explode("emoji")
         return df
-
-
-if __name__ == "__main__":
-    raw = RawData("murphys_clan.txt", {"+44 7964 738500": "Mum"})
-    processed = ProcessedData(raw)

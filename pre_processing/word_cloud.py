@@ -14,13 +14,13 @@ class CloudyWords:
     def get_wordcloud(self):
         return WordCloud(
             min_word_length=2,
-            max_words=150,
-            stopwords=stop_words,
+            max_words=self.max_words,
+            stopwords=self.stop_words,
             relative_scaling=0.2,
             width=1200,
             height=1200,
             background_color="white",
-        ).generate(words)
+        ).generate(self.words)
 
     @staticmethod
     def get_stop_words(stop_words):
