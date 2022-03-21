@@ -7,10 +7,15 @@ import pandas as pd
 import numpy as np
 
 from pre_processing.main_data import RawData, ProcessedData
+from dash_app.plots.frequency import get_layout
 
 app = Dash(__name__)
-
-raw = RawData("murphys_clan_new.txt", alias_dict={"+44 7964 738500": "Mum"})
+alias_dict = {
+    "+44 7964 738500": "Mum",
+    "Rory Pearson": "Rory",
+    "Calum Pearson": "Calum",
+}
+raw = RawData("murphys_clan_new.txt", alias_dict=alias_dict)
 processed = ProcessedData(raw)
 df = processed.df
 df_time = df.groupby(["sender", df["datetime"].dt.date]).size()
@@ -20,16 +25,18 @@ df_time = df_time.reindex(idx, fill_value=0)
 df_time = df_time.rolling(60).mean()
 # df_time.plot.line(figsize=(9, 7))
 
-fig = px.line(df_time, x=df_time.index, y=df_time.columns)
+fig = get_layout(df_time)
+# df_24 = df.groupby(["sender", "hour"]).size().reset_index(name="prod_count")
+# s = df.sender.value_counts()
+# df_24["prod_count"] = df_24["prod_count"].div(df_24["sender"].map(s))
+# grp_24 = df_24.groupby(["sender", "hour"]).sum()
+# df_24 = grp_24.unstack("sender")
+# df_24.replace(np.nan, 0, inplace=True)
+# df_24.plot(kind="line", figsize=(9, 7))
 
 app.layout = html.Div(
     children=[
-        html.H1(children="Hello Dash"),
-        html.Div(
-            children="""
-        Dash: A web application framework for your data.
-    """
-        ),
+        html.H1(children="WhatsApp Analysis"),
         dcc.Graph(id="example-graph", figure=fig),
     ]
 )
