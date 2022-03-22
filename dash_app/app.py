@@ -23,16 +23,8 @@ df_time = df_time.unstack("sender").replace(np.nan, 0)
 idx = pd.date_range(df_time.index.min(), df_time.index.max())
 df_time = df_time.reindex(idx, fill_value=0)
 df_time = df_time.rolling(60).mean()
-# df_time.plot.line(figsize=(9, 7))
 
 fig = get_layout(df_time)
-# df_24 = df.groupby(["sender", "hour"]).size().reset_index(name="prod_count")
-# s = df.sender.value_counts()
-# df_24["prod_count"] = df_24["prod_count"].div(df_24["sender"].map(s))
-# grp_24 = df_24.groupby(["sender", "hour"]).sum()
-# df_24 = grp_24.unstack("sender")
-# df_24.replace(np.nan, 0, inplace=True)
-# df_24.plot(kind="line", figsize=(9, 7))
 
 app.layout = html.Div(
     children=[
