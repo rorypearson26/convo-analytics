@@ -1,5 +1,5 @@
 # Custom
-./raw_export/
+raw_export/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -9,5 +9,11 @@ __pycache__/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
+# Image files
+*.png
+*.eps
+*.jpeg
+*.jpg
+
+# Fonts
+*.ttf
