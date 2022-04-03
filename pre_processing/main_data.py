@@ -21,30 +21,30 @@ tokenizer = Tokenizer(nlp.vocab)
 
 
 class RawData:
-    def __init__(self, file_name, alias_dict={}):
-        self.file_name = file_name
+    def __init__(self, raw_text, alias_dict={}):
+        self.raw_text = raw_text
         self.alias_dict = alias_dict
-        self.file_path = Path(__file__).parents[1] / "raw_export" / self.file_name
         self.cleaned_list = self.get_conversation_as_list()
         self.series = pd.Series(self.cleaned_list)
 
     def get_conversation_as_list(self):
         cleaned_list = []
-        with open(self.file_path, encoding="utf-8") as f:
-            message_buffer = []
-            f.readline()  # Skip first line as never a message.
-            while True:
-                line = f.readline()
-                if not line:
-                    break
-                line = line.strip()
-                if starts_with_timestamp(line):
-                    if message_buffer:
-                        cleaned_list.append("\n".join(message_buffer))
-                    message_buffer.clear()
-                    message_buffer.append(line)
-                else:
-                    message_buffer.append(line)
+        f = self.raw_text
+        # with open(self.raw_text) as f:
+        message_buffer = []
+        f.readline()  # Skip first line as never a message.
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            line = line.strip()
+            if starts_with_timestamp(line):
+                if message_buffer:
+                    cleaned_list.append("\n".join(message_buffer))
+                message_buffer.clear()
+                message_buffer.append(line)
+            else:
+                message_buffer.append(line)
         return cleaned_list
 
 
