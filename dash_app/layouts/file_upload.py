@@ -1,3 +1,4 @@
+from ast import alias
 from datetime import datetime
 import base64
 import io
@@ -45,23 +46,57 @@ def parse_contents(contents, filename, date):
         return html.Div(["There was an error processing this file."])
 
     df = processed.df.astype(str)
+    alias_df = (
+        df.sender.value_counts().rename_axis("sender").reset_index(name="msg_count")
+    )
+    alias_df["alias"] = alias_df["sender"].copy()
 
     return html.Div(
         [
             html.H5(filename),
-            html.H6(datetime.fromtimestamp(date)),
+            html.H6(f"Period {df.datetime.min()} - {df.datetime.max()}"),
             dash_table.DataTable(
-                df.sender.value_counts().to_dict("records"),
+                alias_df.to_dict("records"),
+                style_header={"backgroundColor": "rgb(30, 30, 30)", "color": "white"},
+                style_data={"backgroundColor": "rgb(50, 50, 50)", "color": "white"},
+                columns=[
+                    {"id": "sender", "name": "Sender", "editable": False},
+                    {"id": "msg_count", "name": "Msg Count", "editable": False},
+                    {"id": "alias", "name": "Alias", "editable": True},
+                ],
+                style_cell_conditional=[
+                    {"if": {"column_id": "sender"}, "width": "40%"},
+                    {"if": {"column_id": "alias"}, "width": "40%"},
+                    {"if": {"column_id": "msg_count"}, "width": "20%"},
+                ],
+                css=[
+                    {
+                        "selector": ".dash-spreadsheet-container table",
+                        "rule": "--text-color: white !important",
+                    },
+                ],
+                style_data_conditional=[
+                    {
+                        "if": {"state": "active"},  # 'active' | 'selected'
+                        "backgroundColor": "green",
+                        "border": "1px solid white",
+                        "color": "white",
+                    },
+                    {
+                        "if": {"state": "selected"},
+                        "backgroundColor": "#444444",
+                    },
+                ],
             ),
-            # html.Hr(),  # horizontal line
-            # # For debugging, display the raw contents provided by the web browser
-            # html.Div('Raw Content'),
-            # html.Pre(contents[0:200] + '...', style={
-            #     'whiteSpace': 'pre-wrap',
-            #     'wordBreak': 'break-all'
-            # })
         ]
     )
+    # html.Hr(),  # horizontal line
+    # # For debugging, display the raw contents provided by the web browser
+    # html.Div('Raw Content'),
+    # html.Pre(contents[0:200] + '...', style={
+    #     'whiteSpace': 'pre-wrap',
+    #     'wordBreak': 'break-all'
+    # })
 
 
 @app.callback(
